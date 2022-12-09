@@ -5,7 +5,7 @@ terraform {
     hostname     = "app.terraform.io"
 
     workspaces {
-      name = "f5-xc-uc-gcp-smg--nat-lb-module"
+      name = "f5-xc-uc-gcp-smg-nat-lb-module"
     }
   }
 
@@ -15,10 +15,10 @@ terraform {
       version = "= 0.11.16"
     }
 
-    google = {
+    /*google = {
       source  = "hashicorp/google"
       version = ">= 4.45.0"
-    }
+    }*/
 
     local = ">= 2.2.3"
     null  = ">= 3.1.1"
