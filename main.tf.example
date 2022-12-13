@@ -1,0 +1,351 @@
+variable "project_prefix" {
+  type        = string
+  description = "prefix string put in front of string"
+  default     = "f5xc"
+}
+
+variable "project_suffix" {
+  type        = string
+  description = "prefix string put at the end of string"
+  default     = "01"
+}
+
+variable "project_name" {
+  type    = string
+  default = "gcp-smg-nat-lb"
+}
+
+variable "f5xc_api_p12_file" {
+  type = string
+}
+
+variable "f5xc_api_url" {
+  type = string
+}
+
+variable "f5xc_tenant" {
+  type = string
+}
+
+variable "f5xc_namespace" {
+  type    = string
+  default = "system"
+}
+
+variable "f5xc_api_token" {
+  type = string
+}
+
+variable "f5xc_gcp_cred" {
+  type    = string
+  default = "ck-gcp-01"
+}
+
+variable "ssh_public_key_file" {
+  type = string
+}
+
+variable "gcp_region" {
+  type    = string
+  default = "us-east1"
+}
+
+variable "gcp_zone" {
+  type    = string
+  default = "b"
+}
+
+variable "gcp_project_id" {
+  type = string
+}
+
+variable "gcp_application_credentials" {
+  type = string
+}
+
+variable "origin_port" {
+  type    = number
+  default = 80
+}
+
+variable "advertise_port" {
+  type    = number
+  default = 80
+}
+
+variable "domains" {
+  type    = list(string)
+  default = ["workload.site"]
+}
+
+locals {
+  site_a_name         = format("%s-%s-a-%s", var.project_prefix, var.project_name, var.project_suffix)
+  site_b_name         = format("%s-%s-b-%s", var.project_prefix, var.project_name, var.project_suffix)
+  gcp_zone            = format("%s-%s", var.gcp_region, var.gcp_zone )
+  gcp_network_a       = format("%s-%s-network-a-%s", var.project_prefix, var.project_name, var.project_suffix)
+  gcp_network_b       = format("%s-%s-network-b-%s", var.project_prefix, var.project_name, var.project_suffix)
+  gcp_subnet_a        = format("%s-%s-subnet-%s-%s-%s", var.project_prefix, var.project_name, var.gcp_region, "1-0", var.project_suffix)
+  gcp_subnet_b        = format("%s-%s-subnet-%s-%s-%s", var.project_prefix, var.project_name, var.gcp_region, "2-0", var.project_suffix)
+  f5xc_gcp_zone_names = [local.gcp_zone]
+  advertise_sites     = [local.site_a_name, local.site_b_name]
+  origin_servers      = [
+    {
+      ip              = "172.16.25.100"
+      inside_network  = false
+      outside_network = true
+      site_locator    = {
+        namespace = var.f5xc_namespace
+        name      = local.site_a_name
+        tenant    = var.f5xc_tenant
+      }
+    },
+    {
+      ip              = "172.16.27.100"
+      inside_network  = false
+      outside_network = true
+      site_locator    = {
+        namespace = var.f5xc_namespace
+        name      = local.site_b_name
+        tenant    = var.f5xc_tenant
+      }
+    }
+  ]
+}
+
+provider "volterra" {
+  api_p12_file = var.f5xc_api_p12_file
+  url          = var.f5xc_api_url
+  alias        = "default"
+}
+
+/*provider "google" {
+  credentials = file(var.gcp_application_credentials)
+  project     = var.gcp_project_id
+  region      = var.gcp_region
+  zone        = local.gcp_zone
+  alias       = "default"
+}*/
+
+module "vs" {
+  source                                = "./modules/f5xc/site/virtual"
+  f5xc_namespace                        = "shared"
+  f5xc_virtual_site_name                = format("%s-%s-vs-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_virtual_site_type                = "CUSTOMER_EDGE"
+  f5xc_virtual_site_selector_expression = [
+    format("vsite in (%s-%s-%s)", var.project_prefix, var.project_name, var.project_suffix)
+  ]
+  providers = {
+    volterra = volterra.default
+  }
+}
+
+module "smg" {
+  source                           = "./modules/f5xc/site-mesh-group"
+  f5xc_namespace                   = var.f5xc_namespace
+  f5xc_tenant                      = var.f5xc_tenant
+  f5xc_site_2_site_connection_type = "full_mesh"
+  f5xc_site_mesh_group_name        = format("%s-%s-smg-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_site_mesh_group_description = "F5XC Full Mesh SMG"
+  f5xc_virtual_site_name           = module.vs.virtual-site["name"]
+  f5xc_labels                      = {
+    "ves.io/fleet" = format("%s-%s-fleet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  }
+  providers = {
+    volterra = volterra.default
+  }
+}
+
+resource "volterra_network_connector" "egress" {
+  name      = format("%s-%s-egress-%s", var.project_prefix, var.project_name, var.project_suffix)
+  namespace = var.f5xc_namespace
+
+  sli_to_slo_snat {
+    default_gw_snat = true
+  }
+  disable_forward_proxy = true
+  provider              = volterra.default
+}
+
+resource "volterra_network_firewall" "nfw" {
+  name      = format("%s-%s-nfw-%s", var.project_prefix, var.project_name, var.project_suffix)
+  namespace = var.f5xc_namespace
+  active_network_policies {
+    network_policies {
+      name      = "allow-all"
+      namespace = var.f5xc_namespace
+    }
+  }
+  disable_forward_proxy_policy = true
+  disable_fast_acl             = true
+  provider                     = volterra.default
+}
+
+resource "volterra_fleet" "fleet" {
+  name        = format("%s-%s-fleet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  namespace   = var.f5xc_namespace
+  fleet_label = format("%s-%s-fleet-%s", var.project_prefix, var.project_name, var.project_suffix)
+
+  network_connectors {
+    name      = volterra_network_connector.egress.name
+    namespace = var.f5xc_namespace
+  }
+
+  network_firewall {
+    name      = volterra_network_firewall.nfw.name
+    namespace = var.f5xc_namespace
+  }
+
+  no_bond_devices          = true
+  no_dc_cluster_group      = true
+  disable_gpu              = true
+  logs_streaming_disabled  = true
+  default_storage_class    = true
+  no_storage_device        = true
+  no_storage_interfaces    = true
+  no_storage_static_routes = true
+  allow_all_usb            = true
+  provider                 = volterra.default
+}
+
+module "f5xc-gcp-site-a" {
+  source                            = "./modules/f5xc/site/gcp"
+  f5xc_labels                       = { "vsite" = format("%s-%s-%s", var.project_prefix, var.project_name, var.project_suffix) }
+  f5xc_tenant                       = var.f5xc_tenant
+  f5xc_api_url                      = var.f5xc_api_url
+  f5xc_gcp_cred                     = var.f5xc_gcp_cred
+  f5xc_api_token                    = var.f5xc_api_token
+  f5xc_namespace                    = var.f5xc_namespace
+  f5xc_gcp_region                   = var.gcp_region
+  f5xc_gcp_site_name                = local.site_a_name
+  f5xc_gcp_zone_names               = local.f5xc_gcp_zone_names
+  f5xc_gcp_ce_gw_type               = "multi_nic"
+  f5xc_gcp_node_number              = 1
+  f5xc_gcp_inside_subnet_name       = format("%s-%s-site-a-inside-snet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_inside_network_name      = format("%s-%s-site-a-inside-net-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_outside_subnet_name      = format("%s-%s-site-a-outside-snet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_outside_network_name     = format("%s-%s-site-a-outside-net-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_inside_primary_ipv4      = "172.16.24.0/24"
+  f5xc_gcp_outside_primary_ipv4     = "172.16.25.0/24"
+  f5xc_gcp_default_ce_sw_version    = true
+  f5xc_gcp_default_ce_os_version    = true
+  f5xc_gcp_default_blocked_services = true
+  ssh_public_key                    = var.ssh_public_key_file
+  providers                         = {
+    volterra = volterra.default
+  }
+}
+
+module "f5xc-gcp-site-b" {
+  source                            = "./modules/f5xc/site/gcp"
+  f5xc_labels                       = { "vsite" = format("%s-%s-%s", var.project_prefix, var.project_name, var.project_suffix) }
+  f5xc_tenant                       = var.f5xc_tenant
+  f5xc_api_url                      = var.f5xc_api_url
+  f5xc_gcp_cred                     = var.f5xc_gcp_cred
+  f5xc_api_token                    = var.f5xc_api_token
+  f5xc_namespace                    = var.f5xc_namespace
+  f5xc_gcp_region                   = var.gcp_region
+  f5xc_gcp_site_name                = local.site_b_name
+  f5xc_gcp_zone_names               = local.f5xc_gcp_zone_names
+  f5xc_gcp_ce_gw_type               = "multi_nic"
+  f5xc_gcp_node_number              = 1
+  f5xc_gcp_inside_subnet_name       = format("%s-%s-site-b-inside-snet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_inside_network_name      = format("%s-%s-site-b-inside-net-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_outside_subnet_name      = format("%s-%s-site-b-outside-snet-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_outside_network_name     = format("%s-%s-site-b-outside-net-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_gcp_inside_primary_ipv4      = "172.16.26.0/24"
+  f5xc_gcp_outside_primary_ipv4     = "172.16.27.0/24"
+  f5xc_gcp_default_ce_sw_version    = true
+  f5xc_gcp_default_ce_os_version    = true
+  f5xc_gcp_default_blocked_services = true
+  ssh_public_key                    = var.ssh_public_key_file
+  providers                         = {
+    volterra = volterra.default
+  }
+}
+
+resource "volterra_healthcheck" "hc" {
+  name      = format("%s-%s-hc-%s", var.project_prefix, var.project_name, var.project_suffix)
+  namespace = var.f5xc_namespace
+
+  http_health_check {
+    use_origin_server_name = true
+    path                   = "/"
+  }
+  healthy_threshold   = 1
+  interval            = 15
+  timeout             = 1
+  unhealthy_threshold = 2
+  provider            = volterra.default
+}
+
+resource "volterra_origin_pool" "op" {
+  name                   = format("%s-%s-op-%s", var.project_prefix, var.project_name, var.project_suffix)
+  namespace              = var.f5xc_namespace
+  endpoint_selection     = "DISTRIBUTED"
+  loadbalancer_algorithm = "LB_OVERRIDE"
+  port                   = var.origin_port
+  no_tls                 = true
+
+  dynamic "origin_servers" {
+    for_each = local.origin_servers
+    content {
+      private_ip {
+        ip              = origin_servers.value.ip
+        inside_network  = origin_servers.value.inside_network
+        outside_network = origin_servers.value.outside_network
+        site_locator {
+          site {
+            namespace = origin_servers.value.site_locator.namespace
+            name      = origin_servers.value.site_locator.name
+            tenant    = origin_servers.value.site_locator.tenant
+          }
+        }
+      }
+    }
+  }
+  healthcheck {
+    name = volterra_healthcheck.hc.name
+  }
+  provider = volterra.default
+}
+
+
+resource "volterra_http_loadbalancer" "lb" {
+  name                            = format("%s-%s-lb-%s", var.project_prefix, var.project_name, var.project_suffix)
+  domains                         = var.domains
+  namespace                       = var.f5xc_namespace
+  disable_waf                     = true
+  no_challenge                    = true
+  disable_rate_limit              = true
+  service_policies_from_namespace = true
+
+  advertise_custom {
+    dynamic "advertise_where" {
+      for_each = local.advertise_sites
+      content {
+        port = var.advertise_port
+        site {
+          # ip      = var.advertise_vip
+          network = "SITE_NETWORK_OUTSIDE"
+          site {
+            name      = advertise_where.value
+            namespace = var.f5xc_namespace
+            tenant    = var.f5xc_tenant
+          }
+        }
+      }
+    }
+  }
+
+  default_route_pools {
+    pool {
+      name = volterra_origin_pool.op.name
+    }
+    weight   = 1
+    priority = 1
+  }
+  http {
+    dns_volterra_managed = false
+  }
+  provider = volterra.default
+}
