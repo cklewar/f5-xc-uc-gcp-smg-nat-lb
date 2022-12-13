@@ -1,4 +1,4 @@
-name:
+name: F5XC GCP Egress NAT Ingress LB module
 on: workflow_dispatch
 jobs:
   -module-validate:
