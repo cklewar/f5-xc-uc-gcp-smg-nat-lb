@@ -118,13 +118,13 @@ provider "volterra" {
   alias        = "default"
 }
 
-/*provider "google" {
+provider "google" {
   credentials = file(var.gcp_application_credentials)
   project     = var.gcp_project_id
   region      = var.gcp_region
   zone        = local.gcp_zone
   alias       = "default"
-}*/
+}
 
 module "vs" {
   source                                = "./modules/f5xc/site/virtual"
@@ -232,6 +232,7 @@ module "f5xc-gcp-site-a" {
   ssh_public_key                    = var.ssh_public_key_file
   providers                         = {
     volterra = volterra.default
+    google   = google.default
   }
 }
 
@@ -260,6 +261,7 @@ module "f5xc-gcp-site-b" {
   ssh_public_key                    = var.ssh_public_key_file
   providers                         = {
     volterra = volterra.default
+    google   = google.default
   }
 }
 
