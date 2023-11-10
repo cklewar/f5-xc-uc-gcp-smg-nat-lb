@@ -8,17 +8,17 @@ terraform {
       name = "f5-xc-uc-gcp-smg-nat-lb-module"
     }
   }
-  
+
   required_providers {
     volterra = {
-      source = "volterraedge/volterra"
+      source  = "volterraedge/volterra"
       version = "= 0.11.23"
     }
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
       version = ">= 4.39.0"
     }
     local = ">= 2.2.3"
-    null = ">= 3.1.1"
+    null  = ">= 3.1.1"
   }
 }
