@@ -154,7 +154,6 @@ module "smg" {
   providers = {
     volterra = volterra.default
   }
-
 }
 
 resource "volterra_network_connector" "egress" {
