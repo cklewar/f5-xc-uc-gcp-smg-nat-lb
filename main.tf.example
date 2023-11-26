@@ -116,6 +116,7 @@ provider "volterra" {
   api_p12_file = var.f5xc_api_p12_file
   url          = var.f5xc_api_url
   alias        = "default"
+  timeout      = "30s"
 }
 
 provider "google" {
@@ -140,14 +141,14 @@ module "vs" {
 }
 
 module "smg" {
-  source                           = "./modules/f5xc/site-mesh-group"
-  f5xc_namespace                   = var.f5xc_namespace
-  f5xc_tenant                      = var.f5xc_tenant
-  f5xc_site_2_site_connection_type = "full_mesh"
-  f5xc_site_mesh_group_name        = format("%s-%s-smg-%s", var.project_prefix, var.project_name, var.project_suffix)
-  f5xc_site_mesh_group_description = "F5XC Full Mesh SMG"
-  f5xc_virtual_site_name           = module.vs.virtual-site["name"]
-  f5xc_labels                      = {
+  source                                = "./modules/f5xc/site-mesh-group"
+  f5xc_namespace                        = var.f5xc_namespace
+  f5xc_virtual_site_name                = module.vs.virtual_site["name"]
+  f5xc_site_mesh_group_name             = format("%s-%s-smg-%s", var.project_prefix, var.project_name, var.project_suffix)
+  f5xc_site_2_site_connection_type      = "full_mesh"
+  f5xc_site_mesh_group_description      = "F5XC Full Mesh SMG"
+  f5xc_virtual_site_selector_expression = []
+  f5xc_labels                           = {
     "ves.io/fleet" = format("%s-%s-fleet-%s", var.project_prefix, var.project_name, var.project_suffix)
   }
   providers = {
@@ -166,7 +167,7 @@ resource "volterra_network_connector" "egress" {
   provider              = volterra.default
 }
 
-resource "volterra_network_firewall" "nfw" {
+/*resource "volterra_network_firewall" "nfw" {
   name      = format("%s-%s-nfw-%s", var.project_prefix, var.project_name, var.project_suffix)
   namespace = var.f5xc_namespace
   active_network_policies {
@@ -178,7 +179,7 @@ resource "volterra_network_firewall" "nfw" {
   disable_forward_proxy_policy = true
   disable_fast_acl             = true
   provider                     = volterra.default
-}
+}*/
 
 resource "volterra_fleet" "fleet" {
   name        = format("%s-%s-fleet-%s", var.project_prefix, var.project_name, var.project_suffix)
@@ -190,10 +191,10 @@ resource "volterra_fleet" "fleet" {
     namespace = var.f5xc_namespace
   }
 
-  network_firewall {
+  /*network_firewall {
     name      = volterra_network_firewall.nfw.name
     namespace = var.f5xc_namespace
-  }
+  }*/
 
   no_bond_devices          = true
   no_dc_cluster_group      = true
@@ -312,7 +313,7 @@ resource "volterra_origin_pool" "op" {
 }
 
 
-resource "volterra_http_loadbalancer" "lb" {
+/*resource "volterra_http_loadbalancer" "lb" {
   name                            = format("%s-%s-lb-%s", var.project_prefix, var.project_name, var.project_suffix)
   domains                         = var.domains
   namespace                       = var.f5xc_namespace
@@ -350,4 +351,4 @@ resource "volterra_http_loadbalancer" "lb" {
     dns_volterra_managed = false
   }
   provider = volterra.default
-}
+}*/

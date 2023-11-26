@@ -2,42 +2,42 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/hashicorp/google" {
-  version     = "4.50.0"
+  version     = "5.5.0"
   constraints = ">= 4.39.0"
   hashes = [
-    "h1:ipQbwu2j/Tg/tlHqHBWQy9aRT9z8F46npyfI+4ZzMZs=",
-    "zh:051b7d64b9808296606475f16cb6848577ba559c704c04af7d24789a7ba96e36",
-    "zh:2c6af345add3fa4c92521ce49f52c72c1724afad2f47908bcd878136b03436b9",
-    "zh:2daad7d49bcbf2fe036790249c8504e67b03dded3ea9f00fc0822ae1892d8292",
-    "zh:3b5d0996f35d251ec5723b300337af17bf229838f6f6b77eb09516676236956f",
-    "zh:462eeb217fcc0d15453369be1bec8ad9fa59957e7398ef8e82fcf931058805f7",
-    "zh:5141ef282f69854622221d3bf7580d73d389676fb7362f73c8132f1b82a4f561",
-    "zh:9a83ab13cd57f50a9ac93fed4b02a3fdb525e69a971b0519583ffefbcdf60ba7",
-    "zh:b1cd0e10dcef0b7e7f8f4c51296bbe08767671b145d55e38f011f6c52c78f144",
-    "zh:bc135972d274d8af2c3434ef09ca4028f4ead6cfddb20bfb13809034b0b70730",
-    "zh:db3b4ce4e864b8246edc9e7c5f3581e2c2f6269740307c254b0e5c37fd6665ee",
-    "zh:f384bf5749bdabf9419ada9d3c73a5937ee989753bb40f7060dc586973faa3d3",
+    "h1:TQ4LGg1zAYB81X3ANvzLEjMdq/e05NLBFkG/ZuPHG6s=",
+    "zh:0052a5f222a3e19debb1e5621998809a91e7cc312aa825da21bf2e73876def1f",
+    "zh:116f9797723523efcfa7de3d3884003134a8eda891f6824440c6f56b598ae55b",
+    "zh:3b8bc1e26f856d4193ca50d866862903238196d59368141afdfff1cc992e63ef",
+    "zh:7397a2502a98a7b778df7c95caf0d2b10c873782bb503b5810cb8314912a7595",
+    "zh:8bffba8191eb299c22386c7d94524ea0cbbcff950f76bb2b361c266b17d4c403",
+    "zh:b2566261c0dbf0bfcda85bc9fb109e11c95be206c58ea467ea5772bdaba4166e",
+    "zh:c62527252932484d4e999e0766ae8225216cb89ed53ad00a10babbd24ba75f03",
+    "zh:cfd9cb93ba9fb33bf41aa99bedc225c211ef330e3a9a7a1347b88a8abaa490e4",
+    "zh:f242d0edf3234823f7b7c9ec658c149b36427813c84d554a7c39ed125ac5bec3",
     "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
+    "zh:f80c9936e9efa5234fc55c3436841f3720b384e87db6abc1aacf65a1a225d07f",
+    "zh:fb3b178154e1ff8685add05012c3ebacb7c247be2933af86a9deea72fba30782",
   ]
 }
 
 provider "registry.terraform.io/hashicorp/local" {
-  version     = "2.3.0"
+  version     = "2.4.0"
   constraints = ">= 2.2.3"
   hashes = [
-    "h1:+l9ZTDGmGdwnuYI5ftUjwP8UgoLw4f4V9xoCzal4LW0=",
-    "zh:1f1920b3f78c31c6b69cdfe1e016a959667c0e2d01934e1a084b94d5a02cd9d2",
-    "zh:550a3cdae0ddb350942624e7b2e8b31d28bc15c20511553432413b1f38f4b214",
-    "zh:68d1d9ccbfce2ce56b28a23b22833a5369d4c719d6d75d50e101a8a8dbe33b9b",
-    "zh:6ae3ad6d865a906920c313ec2f413d080efe32c230aca711fd106b4cb9022ced",
+    "h1:R97FTYETo88sT2VHfMgkPU3lzCsZLunPftjSI5vfKe8=",
+    "zh:53604cd29cb92538668fe09565c739358dc53ca56f9f11312b9d7de81e48fab9",
+    "zh:66a46e9c508716a1c98efbf793092f03d50049fa4a83cd6b2251e9a06aca2acf",
+    "zh:70a6f6a852dd83768d0778ce9817d81d4b3f073fab8fa570bff92dcb0824f732",
     "zh:78d5eefdd9e494defcb3c68d282b8f96630502cac21d1ea161f53cfe9bb483b3",
-    "zh:a0f413d50f54124057ae3dcd9353a797b84e91dc34bcf85c34a06f8aef1f9b12",
-    "zh:a2ac6d4088ceddcd73d88505e18b8226a6e008bff967b9e2d04254ef71b4ac6b",
-    "zh:a851010672e5218bdd4c4ea1822706c9025ef813a03da716d647dd6f8e2cffb0",
-    "zh:aa797561755041ef2fad99ee9ffc12b5e724e246bb019b21d7409afc2ece3232",
-    "zh:c6afa960a20d776f54bb1fc260cd13ead17280ebd87f05b9abcaa841ed29d289",
-    "zh:df0975e86b30bb89717b8c8d6d4690b21db66de06e79e6d6cfda769f3304afe6",
-    "zh:f0d3cc3da72135efdbe8f4cfbfb0f2f7174827887990a5545e6db1981f0d3a7c",
+    "zh:82a803f2f484c8b766e2e9c32343e9c89b91997b9f8d2697f9f3837f62926b35",
+    "zh:9708a4e40d6cc4b8afd1352e5186e6e1502f6ae599867c120967aebe9d90ed04",
+    "zh:973f65ce0d67c585f4ec250c1e634c9b22d9c4288b484ee2a871d7fa1e317406",
+    "zh:c8fa0f98f9316e4cfef082aa9b785ba16e36ff754d6aba8b456dab9500e671c6",
+    "zh:cfa5342a5f5188b20db246c73ac823918c189468e1382cb3c48a9c0c08fc5bf7",
+    "zh:e0e2b477c7e899c63b06b38cd8684a893d834d6d0b5e9b033cedc06dd7ffe9e2",
+    "zh:f62d7d05ea1ee566f732505200ab38d94315a4add27947a60afa29860822d3fc",
+    "zh:fa7ce69dde358e172bd719014ad637634bbdabc49363104f4fca759b4b73f2ce",
   ]
 }
 
@@ -62,14 +62,14 @@ provider "registry.terraform.io/hashicorp/null" {
 }
 
 provider "registry.terraform.io/volterraedge/volterra" {
-  version     = "0.11.18"
-  constraints = "0.11.18"
+  version     = "0.11.23"
+  constraints = "0.11.23"
   hashes = [
-    "h1:7MRPvr5i/V0nVtwjOi37aBqH3KpzuEK1q202qU2s1pg=",
-    "zh:123e2eb0fef2390ae4a7d1b39bda56df8a5dd53f50d4604772c11c72efead236",
-    "zh:352cda9486f60efce0e2b23b1703ede6139644b14eb8be8ea4847f6e876c31c4",
-    "zh:714a2de125de9d0d0cce88e2749af90591f88035359290bac0a13feba1505262",
-    "zh:b745aa82b8f9ff3ccf707f869be3d2b5daaffde83e979b3597648982fca2867b",
-    "zh:cc1eb999da1aa8545fd11b1072eca9897cac843c5952b50b4a2a622c27353a7c",
+    "h1:zV45n9QAqHalanhcTIly2xPdKO/hHQb++Da/FZObC14=",
+    "zh:0ffeb9a33e5b7eaebb94d23321fe5e8a64b85756ffbfcf8ed6cf0cdcd9c8b5b2",
+    "zh:47fb014b6e1bb5728b0752373c42ff915a248839776435537278e2f26d7e3349",
+    "zh:8b9c4dfa2e8ca07cf173283692fc6083680cab140d6e57dc984be4cc53b57a33",
+    "zh:8ccd1cdd20c3552065b5cb4b23c9f0453aca843d2d14bb04ecc9e8a5ad77506a",
+    "zh:e8fc64fb1a9c60133409890dada8b2f334ae4b834a2b629fd4b963ecdafb7a0a",
   ]
 }
